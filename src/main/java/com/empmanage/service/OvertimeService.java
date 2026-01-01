@@ -44,6 +44,14 @@ public class OvertimeService {
     public List<Overtime> getOvertimesByEmployeeIdAndMonth(Long employeeId, Integer month, Integer year) {
         return overtimeRepository.findByEmployeeIdAndMonthAndYear(employeeId, month, year);
     }
+
+    @Transactional
+    public void deleteOvertime(Long id) {
+        if (!overtimeRepository.existsById(id)) {
+            throw new IllegalArgumentException("Overtime not found with id: " + id);
+        }
+        overtimeRepository.deleteById(id);
+    }
 }
 
 

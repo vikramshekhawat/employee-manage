@@ -39,6 +39,14 @@ public class AdvanceService {
     public List<Advance> getAdvancesByEmployeeIdAndMonth(Long employeeId, Integer month, Integer year) {
         return advanceRepository.findByEmployeeIdAndMonthAndYear(employeeId, month, year);
     }
+
+    @Transactional
+    public void deleteAdvance(Long id) {
+        if (!advanceRepository.existsById(id)) {
+            throw new IllegalArgumentException("Advance not found with id: " + id);
+        }
+        advanceRepository.deleteById(id);
+    }
 }
 
 

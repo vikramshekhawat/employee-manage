@@ -52,6 +52,12 @@ public class EmployeeController {
         employeeService.deactivateEmployee(id);
         return ResponseEntity.ok(ApiResponse.success("Employee deactivated successfully", null));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Object>> deleteEmployee(@PathVariable Long id) {
+        employeeService.deactivateEmployee(id);
+        return ResponseEntity.ok(ApiResponse.success("Employee deactivated successfully", null));
+    }
 }
 
 

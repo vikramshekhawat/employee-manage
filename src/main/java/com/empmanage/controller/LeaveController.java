@@ -41,6 +41,12 @@ public class LeaveController {
         List<Leave> leaves = leaveService.getLeavesByEmployeeIdAndMonth(employeeId, month, year);
         return ResponseEntity.ok(ApiResponse.success(leaves));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteLeave(@PathVariable Long id) {
+        leaveService.deleteLeave(id);
+        return ResponseEntity.ok(ApiResponse.success("Leave deleted successfully", null));
+    }
 }
 
 

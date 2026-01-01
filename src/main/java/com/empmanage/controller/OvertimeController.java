@@ -41,6 +41,12 @@ public class OvertimeController {
         List<Overtime> overtimes = overtimeService.getOvertimesByEmployeeIdAndMonth(employeeId, month, year);
         return ResponseEntity.ok(ApiResponse.success(overtimes));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteOvertime(@PathVariable Long id) {
+        overtimeService.deleteOvertime(id);
+        return ResponseEntity.ok(ApiResponse.success("Overtime deleted successfully", null));
+    }
 }
 
 

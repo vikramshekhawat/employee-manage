@@ -41,6 +41,12 @@ public class AdvanceController {
         List<Advance> advances = advanceService.getAdvancesByEmployeeIdAndMonth(employeeId, month, year);
         return ResponseEntity.ok(ApiResponse.success(advances));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteAdvance(@PathVariable Long id) {
+        advanceService.deleteAdvance(id);
+        return ResponseEntity.ok(ApiResponse.success("Advance deleted successfully", null));
+    }
 }
 
 

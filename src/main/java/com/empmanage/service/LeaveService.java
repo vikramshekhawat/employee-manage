@@ -43,6 +43,14 @@ public class LeaveService {
     public List<Leave> getUnpaidLeavesByEmployeeIdAndMonth(Long employeeId, Integer month, Integer year) {
         return leaveRepository.findUnpaidLeavesByEmployeeIdAndMonthAndYear(employeeId, month, year);
     }
+
+    @Transactional
+    public void deleteLeave(Long id) {
+        if (!leaveRepository.existsById(id)) {
+            throw new IllegalArgumentException("Leave not found with id: " + id);
+        }
+        leaveRepository.deleteById(id);
+    }
 }
 
 

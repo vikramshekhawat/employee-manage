@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/salary")
+@RequestMapping("/api/salaries")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class SalaryController {
@@ -54,10 +54,10 @@ public class SalaryController {
         return ResponseEntity.ok(ApiResponse.success(salaries));
     }
 
-    @PostMapping("/{salaryId}/resend-sms")
-    public ResponseEntity<ApiResponse<Object>> resendSms(@PathVariable Long salaryId) {
+    @PostMapping("/{salaryId}/send-sms")
+    public ResponseEntity<ApiResponse<Object>> sendSms(@PathVariable Long salaryId) {
         smsService.sendSalarySms(salaryId);
-        return ResponseEntity.ok(ApiResponse.success("SMS resent successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("SMS sent successfully", null));
     }
 }
 
