@@ -13,12 +13,12 @@ public interface AdvanceRepository extends JpaRepository<Advance, Long> {
     List<Advance> findByEmployeeId(Long employeeId);
     
     @Query("SELECT a FROM Advance a WHERE a.employee.id = :employeeId " +
-           "AND MONTH(a.advanceDate) = :month AND YEAR(a.advanceDate) = :year " +
+           "AND a.advanceDate BETWEEN :startDate AND :endDate " +
            "ORDER BY a.advanceDate")
-    List<Advance> findByEmployeeIdAndMonthAndYear(
+    List<Advance> findByEmployeeIdAndDateRange(
             @Param("employeeId") Long employeeId,
-            @Param("month") Integer month,
-            @Param("year") Integer year
+            @Param("startDate") java.time.LocalDate startDate,
+            @Param("endDate") java.time.LocalDate endDate
     );
 }
 

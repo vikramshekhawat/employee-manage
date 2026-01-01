@@ -2,15 +2,19 @@ package com.empmanage.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "salary_details")
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class SalaryDetail {
@@ -21,6 +25,7 @@ public class SalaryDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salary_id", nullable = false)
+    @ToString.Exclude
     private Salary salary;
 
     @Enumerated(EnumType.STRING)

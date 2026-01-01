@@ -2,8 +2,10 @@ package com.empmanage.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,7 +14,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "employees", uniqueConstraints = @UniqueConstraint(columnNames = "mobile"))
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Employee {

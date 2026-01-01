@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -37,7 +39,10 @@ public class AdvanceService {
     }
 
     public List<Advance> getAdvancesByEmployeeIdAndMonth(Long employeeId, Integer month, Integer year) {
-        return advanceRepository.findByEmployeeIdAndMonthAndYear(employeeId, month, year);
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+        return advanceRepository.findByEmployeeIdAndDateRange(employeeId, startDate, endDate);
     }
 }
 

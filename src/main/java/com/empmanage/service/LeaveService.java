@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -37,11 +39,17 @@ public class LeaveService {
     }
 
     public List<Leave> getLeavesByEmployeeIdAndMonth(Long employeeId, Integer month, Integer year) {
-        return leaveRepository.findByEmployeeIdAndMonthAndYear(employeeId, month, year);
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+        return leaveRepository.findByEmployeeIdAndDateRange(employeeId, startDate, endDate);
     }
 
     public List<Leave> getUnpaidLeavesByEmployeeIdAndMonth(Long employeeId, Integer month, Integer year) {
-        return leaveRepository.findUnpaidLeavesByEmployeeIdAndMonthAndYear(employeeId, month, year);
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+        return leaveRepository.findUnpaidLeavesByEmployeeIdAndDateRange(employeeId, startDate, endDate);
     }
 }
 

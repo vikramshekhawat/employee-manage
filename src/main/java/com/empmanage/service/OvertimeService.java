@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -42,7 +44,10 @@ public class OvertimeService {
     }
 
     public List<Overtime> getOvertimesByEmployeeIdAndMonth(Long employeeId, Integer month, Integer year) {
-        return overtimeRepository.findByEmployeeIdAndMonthAndYear(employeeId, month, year);
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+        return overtimeRepository.findByEmployeeIdAndDateRange(employeeId, startDate, endDate);
     }
 }
 

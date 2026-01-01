@@ -13,22 +13,22 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
     List<Leave> findByEmployeeId(Long employeeId);
     
     @Query("SELECT l FROM Leave l WHERE l.employee.id = :employeeId " +
-           "AND MONTH(l.leaveDate) = :month AND YEAR(l.leaveDate) = :year " +
+           "AND l.leaveDate BETWEEN :startDate AND :endDate " +
            "ORDER BY l.leaveDate")
-    List<Leave> findByEmployeeIdAndMonthAndYear(
+    List<Leave> findByEmployeeIdAndDateRange(
             @Param("employeeId") Long employeeId,
-            @Param("month") Integer month,
-            @Param("year") Integer year
+            @Param("startDate") java.time.LocalDate startDate,
+            @Param("endDate") java.time.LocalDate endDate
     );
     
     @Query("SELECT l FROM Leave l WHERE l.employee.id = :employeeId " +
-           "AND MONTH(l.leaveDate) = :month AND YEAR(l.leaveDate) = :year " +
+           "AND l.leaveDate BETWEEN :startDate AND :endDate " +
            "AND l.leaveType = 'UNPAID' " +
            "ORDER BY l.leaveDate")
-    List<Leave> findUnpaidLeavesByEmployeeIdAndMonthAndYear(
+    List<Leave> findUnpaidLeavesByEmployeeIdAndDateRange(
             @Param("employeeId") Long employeeId,
-            @Param("month") Integer month,
-            @Param("year") Integer year
+            @Param("startDate") java.time.LocalDate startDate,
+            @Param("endDate") java.time.LocalDate endDate
     );
 }
 
