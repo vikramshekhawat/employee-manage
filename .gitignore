@@ -70,6 +70,9 @@ logs/
 .env.*.local
 *.properties.local
 application-local.properties
+# Application properties with secrets
+src/main/resources/application.properties
+src/main/resources/application-dev.properties
 
 # Compiled source
 *.com
