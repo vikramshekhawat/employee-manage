@@ -50,8 +50,8 @@ public class SalaryCalculationService {
         BigDecimal dailySalary = baseSalary.divide(BigDecimal.valueOf(30), 2, RoundingMode.HALF_UP);
         BigDecimal leaveDeduction = unpaidLeaveDays.multiply(dailySalary);
 
-        BigDecimal pfDeduction = baseSalary.multiply(employee.getPfPercentage())
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        // Use PF amount directly from employee record
+        BigDecimal pfDeduction = employee.getPfAmount();
 
         // Final Salary = Base Salary + Overtime - Advances - PF - Leave Deduction
         BigDecimal finalSalary = baseSalary
@@ -145,8 +145,8 @@ public class SalaryCalculationService {
         BigDecimal dailySalary = baseSalary.divide(BigDecimal.valueOf(30), 2, RoundingMode.HALF_UP);
         BigDecimal leaveDeduction = unpaidLeaveDays.multiply(dailySalary);
 
-        BigDecimal pfDeduction = baseSalary.multiply(employee.getPfPercentage())
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        // Use PF amount directly from employee record
+        BigDecimal pfDeduction = employee.getPfAmount();
 
         // Final Salary = Base Salary + Overtime - Advances - PF - Leave Deduction
         BigDecimal finalSalary = baseSalary

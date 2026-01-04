@@ -15,7 +15,7 @@ public class EmployeeResponse {
     private String name;
     private String mobile;
     private BigDecimal baseSalary;
-    private BigDecimal pfPercentage;
+    private BigDecimal pfAmount;
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

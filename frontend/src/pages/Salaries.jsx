@@ -269,10 +269,6 @@ const Salaries = () => {
               render: (row) => `₹${row.baseSalary.toLocaleString()}`,
             },
             {
-              header: 'PF %',
-              render: (row) => `${row.pfPercentage}%`,
-            },
-            {
               header: 'Actions',
               render: (row) => (
                 <Button

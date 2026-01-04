@@ -30,8 +30,8 @@ public class Employee {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal baseSalary;
 
-    @Column(nullable = false, precision = 5, scale = 2)
-    private BigDecimal pfPercentage;
+    @Column(name = "pf_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal pfAmount = BigDecimal.ZERO;
 
     @Column(nullable = false)
     private Boolean active = true;

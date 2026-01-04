@@ -20,7 +20,7 @@ const Employees = () => {
     name: '',
     mobile: '',
     baseSalary: '',
-    pfPercentage: '',
+    pfAmount: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -49,22 +49,36 @@ const Employees = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.mobile) {
-      newErrors.mobile = 'Mobile is required';
-    } else if (!/^\d{10}$/.test(formData.mobile)) {
-      newErrors.mobile = 'Mobile must be 10 digits';
+    
+    // Name validation
+    if (!formData.name || !formData.name.trim()) {
+      newErrors.name = 'Name is required';
     }
-    if (!formData.baseSalary) {
+    
+    // Mobile validation - must be exactly 10 digits
+    const mobileTrimmed = formData.mobile ? formData.mobile.trim() : '';
+    if (!mobileTrimmed) {
+      newErrors.mobile = 'Mobile number is required';
+    } else if (!/^\d{10}$/.test(mobileTrimmed)) {
+      newErrors.mobile = 'Mobile number must be exactly 10 digits';
+    }
+    
+    // Base salary validation
+    const baseSalaryValue = parseFloat(formData.baseSalary);
+    if (!formData.baseSalary || formData.baseSalary.trim() === '') {
       newErrors.baseSalary = 'Base salary is required';
-    } else if (formData.baseSalary < 0) {
-      newErrors.baseSalary = 'Base salary must be positive';
+    } else if (isNaN(baseSalaryValue) || baseSalaryValue <= 0) {
+      newErrors.baseSalary = 'Base salary must be a valid positive number';
     }
-    if (!formData.pfPercentage) {
-      newErrors.pfPercentage = 'PF percentage is required';
-    } else if (formData.pfPercentage < 0 || formData.pfPercentage > 100) {
-      newErrors.pfPercentage = 'PF percentage must be between 0 and 100';
+    
+    // PF amount validation
+    const pfAmountValue = parseFloat(formData.pfAmount);
+    if (!formData.pfAmount || formData.pfAmount.trim() === '') {
+      newErrors.pfAmount = 'PF amount is required';
+    } else if (isNaN(pfAmountValue) || pfAmountValue < 0) {
+      newErrors.pfAmount = 'PF amount must be a valid number (0 or greater)';
     }
+    
     return newErrors;
   };
 
@@ -79,10 +93,27 @@ const Employees = () => {
 
     setLoading(true);
     try {
+      const baseSalaryValue = parseFloat(formData.baseSalary);
+      const pfAmountValue = parseFloat(formData.pfAmount);
+      
+      // Validate parsed values
+      if (isNaN(baseSalaryValue) || baseSalaryValue <= 0) {
+        setErrors({ baseSalary: 'Base salary must be a valid positive number' });
+        setLoading(false);
+        return;
+      }
+      
+      if (isNaN(pfAmountValue) || pfAmountValue < 0) {
+        setErrors({ pfAmount: 'PF amount must be a valid number (0 or greater)' });
+        setLoading(false);
+        return;
+      }
+      
       const employeeData = {
-        ...formData,
-        baseSalary: parseFloat(formData.baseSalary),
-        pfPercentage: parseFloat(formData.pfPercentage),
+        name: formData.name.trim(),
+        mobile: formData.mobile.trim(),
+        baseSalary: baseSalaryValue,
+        pfAmount: pfAmountValue,
       };
 
       if (editMode && currentEmployee) {
@@ -96,10 +127,34 @@ const Employees = () => {
       await fetchEmployees();
       handleCloseModal();
     } catch (error) {
-      if (error.data && typeof error.data === 'object') {
-        setErrors(error.data);
+      console.error('Employee operation error:', error);
+      
+      // Handle validation errors from backend
+      // The error structure from API is: { success: false, message: "...", data: { field: "error" } }
+      const errorData = error.data || error;
+      
+      if (errorData.data && typeof errorData.data === 'object') {
+        // Validation errors are in errorData.data
+        setErrors(errorData.data);
+        // Show first error message as toast
+        const firstError = Object.values(errorData.data)[0];
+        if (firstError) {
+          toast.error(firstError);
+        } else if (errorData.message) {
+          toast.error(errorData.message);
+        }
+      } else if (errorData && typeof errorData === 'object' && !errorData.success) {
+        // Direct error object with field errors
+        setErrors(errorData);
+        if (errorData.message) {
+          toast.error(errorData.message);
+        }
+      } else if (error.message) {
+        toast.error(error.message);
+        setErrors({});
       } else {
-        toast.error(error.message || 'Operation failed');
+        toast.error('Operation failed. Please check the form for errors.');
+        setErrors({});
       }
     } finally {
       setLoading(false);
@@ -112,8 +167,8 @@ const Employees = () => {
     setFormData({
       name: employee.name,
       mobile: employee.mobile,
-      baseSalary: employee.baseSalary.toString(),
-      pfPercentage: employee.pfPercentage.toString(),
+      baseSalary: (employee.baseSalary || 0).toString(),
+      pfAmount: (employee.pfAmount || 0).toString(),
     });
     setShowModal(true);
   };
@@ -137,7 +192,7 @@ const Employees = () => {
       name: '',
       mobile: '',
       baseSalary: '',
-      pfPercentage: '',
+      pfAmount: '',
     });
     setErrors({});
     setShowModal(true);
@@ -151,7 +206,7 @@ const Employees = () => {
       name: '',
       mobile: '',
       baseSalary: '',
-      pfPercentage: '',
+      pfAmount: '',
     });
     setErrors({});
   };
@@ -162,11 +217,11 @@ const Employees = () => {
     { header: 'Mobile', accessor: 'mobile' },
     {
       header: 'Base Salary',
-      render: (row) => `₹${row.baseSalary.toLocaleString()}`,
+      render: (row) => `₹${(row.baseSalary || 0).toLocaleString()}`,
     },
     {
-      header: 'PF %',
-      render: (row) => `${row.pfPercentage}%`,
+      header: 'PF Amount',
+      render: (row) => `₹${(row.pfAmount || 0).toLocaleString()}`,
     },
     {
       header: 'Status',
@@ -266,16 +321,15 @@ const Employees = () => {
           />
 
           <Input
-            label="PF Percentage (%)"
-            name="pfPercentage"
+            label="PF Amount (₹)"
+            name="pfAmount"
             type="number"
-            value={formData.pfPercentage}
+            value={formData.pfAmount}
             onChange={handleInputChange}
-            error={errors.pfPercentage}
-            placeholder="Enter PF percentage"
+            error={errors.pfAmount}
+            placeholder="Enter PF amount"
             step="0.01"
             min="0"
-            max="100"
             required
           />
 

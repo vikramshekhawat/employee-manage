@@ -79,7 +79,7 @@ class EndToEndFlowComponentTest {
         employeeRequest.setName("John Doe");
         employeeRequest.setMobile("9876543210");
         employeeRequest.setBaseSalary(new BigDecimal("50000"));
-        employeeRequest.setPfPercentage(new BigDecimal("12"));
+        employeeRequest.setPfAmount(new BigDecimal("6000"));
 
         String employeeResponse = mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)

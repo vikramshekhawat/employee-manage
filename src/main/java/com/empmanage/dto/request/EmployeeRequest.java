@@ -21,9 +21,9 @@ public class EmployeeRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Base salary must be greater than 0")
     private BigDecimal baseSalary;
     
-    @NotNull(message = "PF percentage is required")
-    @DecimalMin(value = "0.0", message = "PF percentage must be 0 or greater")
-    private BigDecimal pfPercentage;
+    @NotNull(message = "PF amount is required")
+    @DecimalMin(value = "0.0", message = "PF amount must be 0 or greater")
+    private BigDecimal pfAmount;
 }
 
 

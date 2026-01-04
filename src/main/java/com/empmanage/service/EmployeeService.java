@@ -28,7 +28,7 @@ public class EmployeeService {
         employee.setName(request.getName());
         employee.setMobile(request.getMobile());
         employee.setBaseSalary(request.getBaseSalary());
-        employee.setPfPercentage(request.getPfPercentage());
+        employee.setPfAmount(request.getPfAmount());
         employee.setActive(true);
 
         Employee saved = employeeRepository.save(employee);
@@ -61,7 +61,7 @@ public class EmployeeService {
         employee.setName(request.getName());
         employee.setMobile(request.getMobile());
         employee.setBaseSalary(request.getBaseSalary());
-        employee.setPfPercentage(request.getPfPercentage());
+        employee.setPfAmount(request.getPfAmount());
 
         Employee updated = employeeRepository.save(employee);
         return mapToResponse(updated);
@@ -86,7 +86,7 @@ public class EmployeeService {
                 employee.getName(),
                 employee.getMobile(),
                 employee.getBaseSalary(),
-                employee.getPfPercentage(),
+                employee.getPfAmount(),
                 employee.getActive(),
                 employee.getCreatedAt(),
                 employee.getUpdatedAt()
