@@ -167,8 +167,16 @@ const Salaries = () => {
       render: (row) => `-₹${row.pfDeduction.toLocaleString()}`,
     },
     {
-      header: 'Leaves',
-      render: (row) => `-₹${row.totalLeaves.toLocaleString()}`,
+      header: 'Attendance',
+      render: (row) => `${row.attendanceDays || 0} days`,
+    },
+    {
+      header: 'Att. Deduction',
+      render: (row) => `-₹${(row.attendanceDeduction || 0).toLocaleString()}`,
+    },
+    {
+      header: 'Food',
+      render: (row) => `-₹${(row.foodExpense || 0).toLocaleString()}`,
     },
     {
       header: 'Final Salary',
@@ -350,10 +358,24 @@ const Salaries = () => {
                   </span>
                 </div>
                 
+                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                  <span className="font-medium">Attendance [{salaryPreview.attendanceDays}/{salaryPreview.daysInMonth} days]</span>
+                  <span className="font-bold text-yellow-600">
+                    {salaryPreview.attendanceDays} days worked
+                  </span>
+                </div>
+                
                 <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                  <span className="font-medium">Leave Deduction (-) [{salaryPreview.unpaidLeaveDays} days]</span>
+                  <span className="font-medium">Attendance Deduction (-)</span>
                   <span className="font-bold text-red-600">
-                    -₹{salaryPreview.leaveDeduction.toLocaleString()}
+                    -₹{salaryPreview.attendanceDeduction.toLocaleString()}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                  <span className="font-medium">Food Expense (-) [₹{salaryPreview.foodPricePerDay}/day]</span>
+                  <span className="font-bold text-red-600">
+                    -₹{salaryPreview.foodExpense.toLocaleString()}
                   </span>
                 </div>
                 
@@ -390,7 +412,8 @@ const Salaries = () => {
                             <Badge
                               variant={
                                 item.type === 'OVERTIME' ? 'success' :
-                                item.type === 'ADVANCE' ? 'warning' : 'danger'
+                                item.type === 'ADVANCE' ? 'warning' :
+                                item.type === 'FOOD' ? 'danger' : 'danger'
                               }
                             >
                               {item.type}

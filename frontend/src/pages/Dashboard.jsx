@@ -186,7 +186,7 @@ const Dashboard = () => {
           >
             <FiAlertCircle className="w-8 h-8 mb-3" />
             <h3 className="font-semibold text-lg">Record Transactions</h3>
-            <p className="text-sm text-green-100 mt-1">Add advances, leaves, overtime</p>
+            <p className="text-sm text-green-100 mt-1">Add advances, attendance, food, overtime</p>
           </Link>
 
           <Link

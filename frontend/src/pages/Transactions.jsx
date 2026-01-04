@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiTrash2, FiDollarSign, FiCalendar, FiClock } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiDollarSign, FiCalendar, FiClock, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 import employeeService from '../services/employee.service';
 import advanceService from '../services/advance.service';
-import leaveService from '../services/leave.service';
+import attendanceService from '../services/attendance.service';
+import foodService from '../services/food.service';
 import overtimeService from '../services/overtime.service';
 import Card from '../components/common/Card';
 import Table from '../components/common/Table';
@@ -13,7 +14,6 @@ import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
 import Select from '../components/common/Select';
 import Loading from '../components/common/Loading';
-import Badge from '../components/common/Badge';
 
 const Transactions = () => {
   const [activeTab, setActiveTab] = useState('advances');
@@ -61,8 +61,11 @@ const Transactions = () => {
         case 'advances':
           response = await advanceService.getAdvancesByEmployee(selectedEmployee);
           break;
-        case 'leaves':
-          response = await leaveService.getLeavesByEmployee(selectedEmployee);
+        case 'attendances':
+          response = await attendanceService.getAttendanceByEmployee(selectedEmployee);
+          break;
+        case 'food':
+          response = await foodService.getFoodExpenseByEmployee(selectedEmployee);
           break;
         case 'overtimes':
           response = await overtimeService.getOvertimesByEmployee(selectedEmployee);
@@ -88,8 +91,10 @@ const Transactions = () => {
     switch (activeTab) {
       case 'advances':
         return 'advanceDate' in transaction && 'amount' in transaction;
-      case 'leaves':
-        return 'leaveDate' in transaction && 'leaveType' in transaction;
+      case 'attendances':
+        return 'month' in transaction && 'daysWorked' in transaction;
+      case 'food':
+        return 'month' in transaction && 'pricePerDay' in transaction;
       case 'overtimes':
         return 'overtimeDate' in transaction && 'hours' in transaction;
       default:
@@ -126,9 +131,18 @@ const Transactions = () => {
         else if (formData.amount <= 0) newErrors.amount = 'Amount must be positive';
         if (!formData.advanceDate) newErrors.advanceDate = 'Date is required';
         break;
-      case 'leaves':
-        if (!formData.leaveDate) newErrors.leaveDate = 'Date is required';
-        if (!formData.leaveType) newErrors.leaveType = 'Leave type is required';
+      case 'attendances':
+        if (!formData.month) newErrors.month = 'Month is required';
+        if (!formData.year) newErrors.year = 'Year is required';
+        if (!formData.daysWorked) newErrors.daysWorked = 'Days worked is required';
+        else if (formData.daysWorked < 0 || formData.daysWorked > 31) 
+          newErrors.daysWorked = 'Days worked must be between 0 and 31';
+        break;
+      case 'food':
+        if (!formData.month) newErrors.month = 'Month is required';
+        if (!formData.year) newErrors.year = 'Year is required';
+        if (!formData.pricePerDay) newErrors.pricePerDay = 'Price per day is required';
+        else if (formData.pricePerDay <= 0) newErrors.pricePerDay = 'Price must be positive';
         break;
       case 'overtimes':
         if (!formData.hours) newErrors.hours = 'Hours is required';
@@ -163,9 +177,19 @@ const Transactions = () => {
           await advanceService.createAdvance(data);
           toast.success('Advance recorded successfully');
           break;
-        case 'leaves':
-          await leaveService.createLeave(data);
-          toast.success('Leave recorded successfully');
+        case 'attendances':
+          data.month = parseInt(data.month);
+          data.year = parseInt(data.year);
+          data.daysWorked = parseInt(data.daysWorked);
+          await attendanceService.createOrUpdateAttendance(data);
+          toast.success('Attendance recorded successfully');
+          break;
+        case 'food':
+          data.month = parseInt(data.month);
+          data.year = parseInt(data.year);
+          data.pricePerDay = parseFloat(data.pricePerDay);
+          await foodService.createOrUpdateFoodExpense(data);
+          toast.success('Food expense recorded successfully');
           break;
         case 'overtimes':
           data.hours = parseFloat(data.hours);
@@ -193,8 +217,11 @@ const Transactions = () => {
           case 'advances':
             await advanceService.deleteAdvance(id);
             break;
-          case 'leaves':
-            await leaveService.deleteLeave(id);
+          case 'attendances':
+            await attendanceService.deleteAttendance(id);
+            break;
+          case 'food':
+            await foodService.deleteFoodExpense(id);
             break;
           case 'overtimes':
             await overtimeService.deleteOvertime(id);
@@ -216,10 +243,29 @@ const Transactions = () => {
       return;
     }
     
-    setFormData({
-      [activeTab === 'advances' ? 'advanceDate' : activeTab === 'leaves' ? 'leaveDate' : 'overtimeDate']: 
-        new Date().toISOString().split('T')[0],
-    });
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+    
+    let initialData = {};
+    switch (activeTab) {
+      case 'advances':
+        initialData = { advanceDate: today.toISOString().split('T')[0] };
+        break;
+      case 'attendances':
+        initialData = { month: currentMonth, year: currentYear, daysWorked: '' };
+        break;
+      case 'food':
+        initialData = { month: currentMonth, year: currentYear, pricePerDay: '' };
+        break;
+      case 'overtimes':
+        initialData = { overtimeDate: today.toISOString().split('T')[0] };
+        break;
+      default:
+        break;
+    }
+    
+    setFormData(initialData);
     setErrors({});
     setShowModal(true);
   };
@@ -232,7 +278,8 @@ const Transactions = () => {
 
   const tabs = [
     { id: 'advances', label: 'Advances', icon: FiDollarSign },
-    { id: 'leaves', label: 'Leaves', icon: FiCalendar },
+    { id: 'attendances', label: 'Attendance', icon: FiCheckCircle },
+    { id: 'food', label: 'Food', icon: FiCalendar },
     { id: 'overtimes', label: 'Overtime', icon: FiClock },
   ];
 
@@ -268,28 +315,48 @@ const Transactions = () => {
             ),
           },
         ];
-      case 'leaves':
+      case 'attendances':
         return [
           { header: 'ID', accessor: 'id' },
-          {
-            header: 'Date',
+          { 
+            header: 'Month', 
             render: (row) => {
-              try {
-                return row.leaveDate ? format(new Date(row.leaveDate), 'dd MMM yyyy') : 'N/A';
-              } catch (error) {
-                return 'Invalid Date';
-              }
-            },
+              const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              return row.month ? monthNames[row.month - 1] : 'N/A';
+            }
+          },
+          { header: 'Year', accessor: 'year' },
+          { 
+            header: 'Days Worked', 
+            render: (row) => row.daysWorked ? `${row.daysWorked} days` : '0 days'
           },
           {
-            header: 'Type',
+            header: 'Actions',
             render: (row) => (
-              <Badge variant={row.leaveType === 'PAID' ? 'success' : 'warning'}>
-                {row.leaveType || 'N/A'}
-              </Badge>
+              <button
+                onClick={() => handleDelete(row.id)}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+              >
+                <FiTrash2 className="w-4 h-4" />
+              </button>
             ),
           },
-          { header: 'Description', accessor: 'description' },
+        ];
+      case 'food':
+        return [
+          { header: 'ID', accessor: 'id' },
+          { 
+            header: 'Month', 
+            render: (row) => {
+              const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              return row.month ? monthNames[row.month - 1] : 'N/A';
+            }
+          },
+          { header: 'Year', accessor: 'year' },
+          {
+            header: 'Price per Day',
+            render: (row) => row.pricePerDay ? `₹${row.pricePerDay.toLocaleString()}` : '₹0',
+          },
           {
             header: 'Actions',
             render: (row) => (
@@ -378,36 +445,98 @@ const Transactions = () => {
             />
           </>
         );
-      case 'leaves':
+      case 'attendances':
         return (
           <>
-            <Input
-              label="Date"
-              name="leaveDate"
-              type="date"
-              value={formData.leaveDate || ''}
-              onChange={handleInputChange}
-              error={errors.leaveDate}
-              required
-            />
             <Select
-              label="Leave Type"
-              name="leaveType"
-              value={formData.leaveType || ''}
+              label="Month"
+              name="month"
+              value={formData.month || ''}
               onChange={handleInputChange}
-              error={errors.leaveType}
+              error={errors.month}
               options={[
-                { value: 'PAID', label: 'Paid Leave' },
-                { value: 'UNPAID', label: 'Unpaid Leave' },
+                { value: 1, label: 'January' },
+                { value: 2, label: 'February' },
+                { value: 3, label: 'March' },
+                { value: 4, label: 'April' },
+                { value: 5, label: 'May' },
+                { value: 6, label: 'June' },
+                { value: 7, label: 'July' },
+                { value: 8, label: 'August' },
+                { value: 9, label: 'September' },
+                { value: 10, label: 'October' },
+                { value: 11, label: 'November' },
+                { value: 12, label: 'December' },
               ]}
               required
             />
             <Input
-              label="Description"
-              name="description"
-              value={formData.description || ''}
+              label="Year"
+              name="year"
+              type="number"
+              value={formData.year || ''}
               onChange={handleInputChange}
-              placeholder="Optional description"
+              error={errors.year}
+              placeholder="Enter year"
+              required
+            />
+            <Input
+              label="Days Worked"
+              name="daysWorked"
+              type="number"
+              value={formData.daysWorked || ''}
+              onChange={handleInputChange}
+              error={errors.daysWorked}
+              placeholder="Enter days worked"
+              required
+            />
+          </>
+        );
+      case 'food':
+        return (
+          <>
+            <Select
+              label="Month"
+              name="month"
+              value={formData.month || ''}
+              onChange={handleInputChange}
+              error={errors.month}
+              options={[
+                { value: 1, label: 'January' },
+                { value: 2, label: 'February' },
+                { value: 3, label: 'March' },
+                { value: 4, label: 'April' },
+                { value: 5, label: 'May' },
+                { value: 6, label: 'June' },
+                { value: 7, label: 'July' },
+                { value: 8, label: 'August' },
+                { value: 9, label: 'September' },
+                { value: 10, label: 'October' },
+                { value: 11, label: 'November' },
+                { value: 12, label: 'December' },
+              ]}
+              required
+            />
+            <Input
+              label="Year"
+              name="year"
+              type="number"
+              value={formData.year || ''}
+              onChange={handleInputChange}
+              error={errors.year}
+              placeholder="Enter year"
+              required
+            />
+            <Input
+              label="Price per Day (₹)"
+              name="pricePerDay"
+              type="number"
+              value={formData.pricePerDay || ''}
+              onChange={handleInputChange}
+              error={errors.pricePerDay}
+              placeholder="Enter daily food price"
+              step="0.01"
+              required
             />
           </>
         );
@@ -465,7 +594,7 @@ const Transactions = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Transactions</h1>
-          <p className="text-gray-600 mt-1">Record advances, leaves, and overtime</p>
+          <p className="text-gray-600 mt-1">Record advances, attendance, food expenses, and overtime</p>
         </div>
         <Button onClick={handleAddNew} variant="primary">
           <div className="flex items-center space-x-2">
@@ -556,4 +685,3 @@ const Transactions = () => {
 };
 
 export default Transactions;
-
